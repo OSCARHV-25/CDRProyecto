@@ -1,7 +1,7 @@
 package cdr_proyecto;
 
 
-public class Principal {
+public class CDR {
 
 
 }

@@ -1,43 +1,53 @@
 package cdr_proyecto.proyecto;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Productor implements Runnable {
-
-    //Traigo eso de la clase de BufferCompartido y todas las variables que son final se tienen que poner en un constructor
+    // Traigo eso de la clase de BufferCompartido y todas las variables que son final se tienen que poner en un constructor
     private final BufferCompartido buffer;
-
-    //Ruta del archivo que va a leer el productor
+    // Ruta del archivo que va a leer el productor
     private final String rutaArchivo;
-
-    // variable para el idProductor
+    // Variable para el idProductor
     private final String idProductor;
+    // Identificador unico para el productor
+    private final int identificadorProductor;
+    // Total de productores
+    private final int totalProductores;
 
-    public Productor(BufferCompartido buffer, String rutaArchivo, String idProductor) {
+    public Productor(BufferCompartido buffer, String rutaArchivo, String idProductor, int identificadorProductor, int totalProductores) {
         this.buffer = buffer;
         this.rutaArchivo = rutaArchivo;
         this.idProductor = idProductor;
+        this.identificadorProductor = identificadorProductor;
+        this.totalProductores = totalProductores;
     }
 
     @Override
     public void run() {
-        //esto es para la ruta del archivo que se creara el que leera el lector
-        try(BufferedReader lector = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(rutaArchivo)))){ //se abre el archivo
-            String linea; //variable que sellame linea
-            //En este leera la linea mientras no sea nulo
-            while ((linea = lector.readLine()) != null) { // el lector.readLine leera solo una liena
-                String mensaje = linea + "," + idProductor; // este concatena la linea leida con una coma y su id del productor
-                buffer.producir(mensaje);// lo agregaremos al buffer la liena leia
-                System.out.println("Producido por " + idProductor + " : " + mensaje); //imprime la liena leida con el id y el mensaje que es la concatenacion de la liena leida
-                Thread.sleep(5);
-                //Thread.sleep((int)(Math.random() * 1000));
+        // Esto es para la ruta del archivo que se leera el lector
+        try (BufferedReader lector = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(rutaArchivo)))) { // Se abre el archivo
+            List<String> almacenLineas = new ArrayList<>(); //almacena las lineas del archivo
+            String linea; // Variable que se llama linea
+            while ((linea = lector.readLine()) != null) { // Lee la linea
+                almacenLineas.add(linea); // Añade la linea a la lista
             }
 
-        }catch (IOException | InterruptedException e){
-            Thread.currentThread().interrupt(); // si hay una interrupcion vamos  a interrumpir el hilo
-        }
+            // Ciclo for
+            for (int i = identificadorProductor; i < almacenLineas.size(); i += totalProductores) {
+                String mensaje = almacenLineas.get(i) + "," + idProductor; //Crea un mensaje con la linea y el Id del productor
+                if (mensaje != null) { //Valida que el mensaje no sea nulo
+                    buffer.producir(mensaje); // Lo produce y lo agrega al buffer
+                    System.out.println("Producido por: " + idProductor + ": " + mensaje);
+                    Thread.sleep(5);
+                }
+            }
 
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt(); // Si hay una interrupcion vamos a interrumpir el hilo
+        }
     }
 }
+

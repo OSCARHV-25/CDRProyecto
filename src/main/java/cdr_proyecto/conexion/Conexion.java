@@ -8,7 +8,7 @@ public class Conexion {
     public static Connection getConexion(){ //metodo estatico que devuelve un objeto que se LLama getConnection
         Connection conexion = null; // permite al metodo devolver null si pasa algun error
         var baseDatos = "proyecto_cdr";
-        var url = "jdbc:mysql://localhost:3308/" + baseDatos;
+        var url = "jdbc:mysql://localhost:3306/" + baseDatos;
         var usuario = "root";
         var password = "";
         try{
@@ -30,11 +30,4 @@ public class Conexion {
         return conexion;
     }
 
-    /*public static void main(String[] args) {
-        var conexion = Conexion.getConexion();
-        if(conexion != null)
-            System.out.println("Conexion exitosa: " + conexion);
-        else
-            System.out.println("Error al conectarse");
-    }*/
 }

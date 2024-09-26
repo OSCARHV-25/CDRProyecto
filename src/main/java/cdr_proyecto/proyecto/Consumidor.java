@@ -1,54 +1,52 @@
 package cdr_proyecto.proyecto;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
+import cdr_proyecto.conexion.Conexion; // importamos la clase para usar la conexion
+import java.sql.Connection; // importamos para amnejar el crud
+import java.sql.PreparedStatement; // las reglas sql
+import java.sql.SQLException; // para manejar exepciones de sql
+
+//clase consunmidor
 public class Consumidor implements Runnable {
 
-    private final BufferCompartido buffer;
+    private final BufferCompartido buffer; //buffer compartido  entre productores y consumidor
+    private final String idConsumidor; // para distinguitlo en la bd o en la salida
 
-    private final String idConsumidor;
 
-
-    private static final Lock lock = new ReentrantLock(); // se puede utilizar el sincronized pero tambien el lock funciona como un objeto
-
-    //constructor
-    public Consumidor(BufferCompartido buffer, String idConsumidor )  { //throws IOException, se quito esto porque ya no se ocupa la variable impresora
+    //constructor que inicializa en el buffer y idconsumidor
+    public Consumidor(BufferCompartido buffer, String idConsumidor) {
         this.buffer = buffer;
         this.idConsumidor = idConsumidor;
-
     }
+
     @Override
-    public void run(){
+    public void run() {
+        PreparedStatement ps = null; // para insertar datos en la bd
+        try (Connection conex = Conexion.getConexion()) { //obtenemos la conexion  en la bd
+            while (true) { // bucle para consumir los datos
+                String mensaje = buffer.consumir(); // para consmir l9os datos del archivo
 
-        PreparedStatement ps = null; // para insertar la intruccion sql
+                synchronized (this) { // para asegurar la sincronizacion
+                    String[] partes = mensaje.split(",", 8);//para dividir el mensaje en las 8 partes
 
-
-        try (Connection conex = Conexion.getConexion()){
-            while(true){
-                String mensaje = buffer.consumir();
-
-                // cuerpo de nuestra logica
-                lock.lock(); // bloquea hasta que se ejecute
-                try{
-                    //se divide por comas el mensaje
-                    String[] partes = mensaje.split(",", 8); // el 8 porque lo que leera por cada palabra
-                    if (partes.length == 8){// aqui se valida que si tenga el tamaño 8
+                    // verificamos si son 8 partes de mensajes
+                    if (partes.length == 8) {
+                        // asignamos cada parte en una variable con su nombre
                         String numero_cuenta = partes[0];
                         String numero_del_que_llama = partes[1];
                         String numero_al_que_se_llama = partes[2];
                         String fecha = partes[3];
-                        int duracion = Integer.parseInt(partes[4]);
-                        double tarifa = Double.parseDouble(partes[5]);
+                        int duracion = Integer.parseInt(partes[4]); // convcertimos a entero el dato
+                        double tarifa = Double.parseDouble(partes[5]); // convertimos en double la tarifa
                         String categoria = partes[6];
                         String idProductor = partes[7];
 
-
-
+                        // insertamos la consulta en la bd
                         String sql = "INSERT INTO cdr (numero_cuenta, numero_del_que_llama, numero_al_que_se_llama, fecha, duracion, tarifa, categoria, id_Productor, id_Consumidor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                        ps = conex.prepareStatement(sql); // para que se pueda ejecutar la consulta
+
+                        // se prepara la consulta
+                        ps = conex.prepareStatement(sql);
+
+                        // parametros para la consulta
                         ps.setString(1, numero_cuenta);
                         ps.setString(2, numero_del_que_llama);
                         ps.setString(3, numero_al_que_se_llama);
@@ -58,29 +56,23 @@ public class Consumidor implements Runnable {
                         ps.setString(7, categoria);
                         ps.setString(8, idProductor);
                         ps.setString(9, idConsumidor);
+
+                        // insertamos el registro
                         ps.executeUpdate();
 
-                        System.out.println("Dato procesado: " + idConsumidor + ", " + numero_cuenta + ", " + numero_del_que_llama + ", "+ numero_al_que_se_llama + fecha + ", " + duracion + ", " + tarifa + ", " + categoria + ", " + idProductor );
-
-
-
-
+                        // mostramos que el dato ha sido consumido y procesado
+                        System.out.println("Dato Consumido: " + idConsumidor + ", " + numero_cuenta + ", " + numero_del_que_llama + ", " + numero_al_que_se_llama + ", " + fecha + ", " + duracion + ", " + tarifa + ", " + categoria + ", " + idProductor);
                     }
-                }finally {
-
-                    lock.unlock(); // Este desloquea cuando ya se termina todos los datos de leer y ya puede salir de la ejecucion
                 }
             }
-        }catch (InterruptedException | SQLException e){
-            Thread.currentThread().interrupt();
-
-        }finally {
+        } catch (InterruptedException | SQLException e) { // manejamos la interrupcion y execpcion
+            Thread.currentThread().interrupt(); //esto interrumpira el hilo si hay error
+        } finally {
+            // si no es null se cierra para librerar recursos
             try {
-                if(ps != null)
-                    ps.close(); // también se cierra el prepareStatement, antes de la conexión
-
-
-            }catch (SQLException e){
+                if (ps != null)
+                    ps.close();
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }

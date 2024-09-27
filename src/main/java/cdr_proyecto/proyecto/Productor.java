@@ -37,7 +37,7 @@ public class Productor implements Runnable {
 
             // Ciclo for
             for (int i = identificadorProductor; i < almacenLineas.size(); i += totalProductores) {
-                String mensaje = almacenLineas.get(i) + "," + idProductor; //Crea un mensaje con la linea y el Id del productor
+                String mensaje = almacenLineas.get(i) + "," + idProductor  + "," + LocalTime.now();  //Crea un mensaje con la linea y el Id del productor
                 if (mensaje != null) { //Valida que el mensaje no sea nulo
                     buffer.producir(mensaje); // Lo produce y lo agrega al buffer
                     System.out.println("Producido por: " + idProductor + ": " + mensaje);

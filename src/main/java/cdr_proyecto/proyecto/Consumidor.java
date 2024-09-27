@@ -1,5 +1,4 @@
 package cdr_proyecto.proyecto;
-
 import cdr_proyecto.conexion.Conexion; // importamos la clase para usar la conexion
 import java.sql.Connection; // importamos para amnejar el crud
 import java.sql.PreparedStatement; // las reglas sql
@@ -29,7 +28,7 @@ public class Consumidor implements Runnable {
                     String[] partes = mensaje.split(",", 8);//para dividir el mensaje en las 8 partes
 
                     // verificamos si son 8 partes de mensajes
-                    if (partes.length == 8) {
+                    if (partes.length == 9) {
                         // asignamos cada parte en una variable con su nombre
                         String numero_cuenta = partes[0];
                         String numero_del_que_llama = partes[1];
@@ -39,9 +38,13 @@ public class Consumidor implements Runnable {
                         double tarifa = Double.parseDouble(partes[5]); // convertimos en double la tarifa
                         String categoria = partes[6];
                         String idProductor = partes[7];
+                        LocalTime hora_producido = LocalTime.parse(partes[8]);
+
+                        // Variable para saber la hora que se consumio el dato
+                        LocalTime hora_consumido = LocalTime.now();
 
                         // insertamos la consulta en la bd
-                        String sql = "INSERT INTO cdr (numero_cuenta, numero_del_que_llama, numero_al_que_se_llama, fecha, duracion, tarifa, categoria, id_Productor, id_Consumidor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        String sql = "INSERT INTO cdr (numero_cuenta, numero_del_que_llama, numero_al_que_se_llama, fecha, duracion, tarifa, categoria, id_Productor, id_Consumidor, hora_producido, hora_consumido) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                         // se prepara la consulta
                         ps = conex.prepareStatement(sql);
@@ -56,7 +59,8 @@ public class Consumidor implements Runnable {
                         ps.setString(7, categoria);
                         ps.setString(8, idProductor);
                         ps.setString(9, idConsumidor);
-
+                        ps.setTime(10, Time.valueOf(hora_producido));
+                        ps.setTime(11, Time.valueOf(hora_consumido));
                         // insertamos el registro
                         ps.executeUpdate();
 

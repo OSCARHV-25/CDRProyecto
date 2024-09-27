@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalTime;
 
 public class Productor implements Runnable {
     // Traigo eso de la clase de BufferCompartido y todas las variables que son final se tienen que poner en un constructor

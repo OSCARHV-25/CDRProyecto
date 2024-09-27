@@ -3,6 +3,9 @@ import cdr_proyecto.conexion.Conexion; // importamos la clase para usar la conex
 import java.sql.Connection; // importamos para amnejar el crud
 import java.sql.PreparedStatement; // las reglas sql
 import java.sql.SQLException; // para manejar exepciones de sql
+import java.sql.Time;
+import java.time.LocalTime;
+
 
 //clase consunmidor
 public class Consumidor implements Runnable {
@@ -25,7 +28,7 @@ public class Consumidor implements Runnable {
                 String mensaje = buffer.consumir(); // para consmir l9os datos del archivo
 
                 synchronized (this) { // para asegurar la sincronizacion
-                    String[] partes = mensaje.split(",", 8);//para dividir el mensaje en las 8 partes
+                    String[] partes = mensaje.split(",", 9);//para dividir el mensaje en las 8 partes
 
                     // verificamos si son 8 partes de mensajes
                     if (partes.length == 9) {
@@ -65,7 +68,8 @@ public class Consumidor implements Runnable {
                         ps.executeUpdate();
 
                         // mostramos que el dato ha sido consumido y procesado
-                        System.out.println("Dato Consumido: " + idConsumidor + ", " + numero_cuenta + ", " + numero_del_que_llama + ", " + numero_al_que_se_llama + ", " + fecha + ", " + duracion + ", " + tarifa + ", " + categoria + ", " + idProductor);
+                        System.out.println("Dato Consumido: " + idConsumidor + ", " + numero_cuenta + ", " + numero_del_que_llama + ", " + numero_al_que_se_llama + ", " + fecha + ", " + duracion + ", " + tarifa + ", " + categoria + ", " + idProductor + ", " + hora_producido + ", " + hora_consumido);
+
                     }
                 }
             }

@@ -10,13 +10,13 @@ public class BufferCompartido {
     }
 
     public void producir(String item) throws InterruptedException {
-        cola.put(item); // El put para producir un item o un numero
+        cola.put(item); // El put para producir un item o la linea a producir
         System.out.println("Elemento producido: " + item);
     }
 
 
-    public String consumir() throws InterruptedException { // el String porque consumir si nos devolvera algo
-        String item = cola.take();//El take es para tomar o consumir un numero de la cola el primero en la cola
+    public String consumir() throws InterruptedException { //  el String porque consumir si nos devolvera un valor string
+        String item = cola.take();//El take es para tomar o consumir la linea de la cola
         System.out.println("Elemento consumido: " + item);
         return item; // tiene que retornar el valor que esta retornando de la cola
 

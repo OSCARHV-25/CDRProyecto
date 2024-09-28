@@ -1,6 +1,5 @@
 package cdr_proyecto.proyecto;
 
-
 public class CDR {
     public static void main(String[] args) throws Exception {
         //se define la capacidad del buffer
